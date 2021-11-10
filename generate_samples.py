@@ -60,6 +60,13 @@ def adjust_dynamic_range(data, drange_in=(-1, 1), drange_out=(0, 1)):
     return torch.clamp(data, min=0, max=1)
 
 
+def generateLatent():
+    from config import cfg as opt
+    latent_size = opt.model.gen.latent_size
+    point = torch.randn(1, latent_size)
+    point = (point / point.norm()) * (latent_size ** 0.5)
+    return point
+
 def main(args):
     """
     Main function for the script
@@ -94,8 +101,9 @@ def main(args):
         for img_num in tqdm(range(1, args.num_samples + 1)):
             # generate the images:
             with torch.no_grad():
-                point = torch.randn(1, latent_size)
-                point = (point / point.norm()) * (latent_size ** 0.5)
+                # point = torch.randn(1, latent_size)
+                # point = (point / point.norm()) * (latent_size ** 0.5)
+                point = generateLatent()
                 ss_image = gen(point, depth=out_depth, alpha=1)
                 # color adjust the generated image:
                 ss_image = adjust_dynamic_range(ss_image)

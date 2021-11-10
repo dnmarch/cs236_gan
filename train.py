@@ -70,12 +70,14 @@ if __name__ == '__main__':
 
     # device
     if opt.device == 'cuda':
-        os.environ['CUDA_VISIBLE_DEVICES'] = opt.device_id
-        num_gpus = len(opt.device_id.split(','))
-        logger.info("Using {} GPUs.".format(num_gpus))
-        logger.info("Training on {}.\n".format(torch.cuda.get_device_name(0)))
+        # os.environ['CUDA_VISIBLE_DEVICES'] = opt.device_id
+        # num_gpus = len(opt.device_id.split(','))
+        # logger.info("Using {} GPUs.".format(num_gpus))
+        # logger.info("Training on {}.\n".format(torch.cuda.get_device_name(0)))
         cudnn.benchmark = True
-    device = torch.device(opt.device)
+
+    a = torch.rand((3, 2)).cuda()
+    device = torch.device(a.device)
 
     # create the dataset for training
     dataset = make_dataset(opt.dataset, conditional=opt.conditional)
