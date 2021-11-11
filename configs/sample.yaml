@@ -4,8 +4,8 @@ output_dir: '/content/cs236_gan/data/out/dog'
 structure: 'linear'
 device_id: ('3')
 dataset:
-  img_dir: '/content/cs236_gan/data/dog_images'
-  folder: False
+  img_dir: '/content/cs236_gan/data/Images'
+  folder: True
   resolution: 128
 sched:
   epochs: [2,4,4,4,4,8]

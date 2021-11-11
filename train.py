@@ -56,8 +56,10 @@ if __name__ == '__main__':
     # make output dir
     output_dir = opt.output_dir
     if os.path.exists(output_dir):
-        raise KeyError("Existing path: ", output_dir)
-    os.makedirs(output_dir)
+        pass
+        # raise KeyError("Existing path: ", output_dir)
+    else:
+        os.makedirs(output_dir)
 
     # copy codes and config file
     files = list_dir_recursively_with_ignore('.', ignores=['diagrams', 'configs'])
