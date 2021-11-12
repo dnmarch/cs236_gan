@@ -6,6 +6,6 @@ device_id: ('3')
 dataset:
   img_dir: '/content/cs236_gan/data/Images'
   folder: True
-  resolution: 128
+  resolution: 64
 sched:
-  epochs: [2,4,4,4,4,8]
+  epochs: [40,80,80,80,80]

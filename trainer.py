@@ -70,7 +70,6 @@ def compute_loss_g(net_g, net_d, z, loss_func_g):
 
     return loss_g, fakes, fake_preds
 
-
 def compute_loss_d(net_g, net_d, reals, z, loss_func_d):
     r"""
     General implementation to compute discriminator loss.
@@ -83,6 +82,25 @@ def compute_loss_d(net_g, net_d, reals, z, loss_func_d):
 
     return loss_d, fakes, real_preds, fake_preds
 
+def compute_loss_g_style(net_g, net_d, z, loss_func_g, depth=4, alpha=1):
+    fakes = net_g(z, depth=depth, alpha=alpha)
+    fake_preds = net_d(fakes, depth=depth, alpha=alpha).view(-1)
+    loss_g = loss_func_g(fake_preds)
+
+    return loss_g, fakes, fake_preds
+
+
+def compute_loss_d_style(net_g, net_d, reals, z, loss_func_d, depth=4, alpha=1):
+    r"""
+    General implementation to compute discriminator loss.
+    """
+
+    real_preds = net_d(reals,  depth=depth, alpha=alpha).view(-1)
+    fakes = net_g(z, depth=depth, alpha=alpha).detach()
+    fake_preds = net_d(fakes, depth=depth, alpha=alpha).view(-1)
+    loss_d = loss_func_d(real_preds, fake_preds)
+
+    return loss_d, fakes, real_preds, fake_preds
 
 def train_step(net, opt, sch, compute_loss):
     r"""
@@ -99,7 +117,7 @@ def train_step(net, opt, sch, compute_loss):
     return loss
 
 
-def evaluate(net_g, net_d, dataloader, nz, device, samples_z=None):
+def evaluate(net_g, net_d, dataloader, nz, device, samples_z=None, style=True):
     r"""
     Evaluates model and logs metrics.
     Attributes:
@@ -126,19 +144,28 @@ def evaluate(net_g, net_d, dataloader, nz, device, samples_z=None):
             [],
             [],
         )
+        compute_loss_dis = compute_loss_d if not style else compute_loss_d_style
+        compute_loss_gen = compute_loss_g if not style else compute_loss_g_style
 
-        for data, _ in tqdm(dataloader, desc="Evaluating Model"):
+        for i, batch in enumerate(dataloader, 1):
+            # calculate the alpha for fading in the layers
+            # alpha = ticker / fade_point if ticker <= fade_point else 1
 
+            # extract current batch of data for training
+
+
+        #for data, _ in tqdm(dataloader, desc="Evaluating Model"):
+            data = batch
             # Compute losses and save intermediate outputs
             reals, z = prepare_data_for_gan(data, nz, device)
-            loss_d, fakes, real_pred, fake_pred = compute_loss_d(
+            loss_d, fakes, real_pred, fake_pred = compute_loss_dis(
                 net_g,
                 net_d,
                 reals,
                 z,
                 hinge_loss_d,
             )
-            loss_g, _, _ = compute_loss_g(
+            loss_g, _, _ = compute_loss_gen(
                 net_g,
                 net_d,
                 z,

@@ -7,9 +7,10 @@ import torch
 from torchmetrics.image.fid import NoTrainInceptionV3
 
 # styleGAN import
+from data import get_data_loader
 import util
 from model import *
-
+from data import make_dataset
 from models.GAN import Generator, Discriminator
 from trainer import evaluate, prepare_data_for_gan, prepare_data_for_inception
 import os
@@ -39,7 +40,8 @@ def parse_args():
     parser.add_argument(
         "--ckpt_path",
         type=str,
-        required=True,
+        default=None,
+        required=False,
         help="Path to checkpoint used for evaluation.",
     )
     parser.add_argument(
@@ -69,6 +71,8 @@ def parse_args():
         action="store_true",
         help="Generate Inception embeddings used for leaderboard submission.",
     )
+
+    parser.add_argument('--config', default='./configs/sample.yaml')
 
     parser.add_argument("--start_depth", action="store", type=int, default=0,
                         help="Starting depth for training the network")
@@ -125,6 +129,12 @@ def eval(args):
         4,
     )
 
+    nz, eval_size, num_workers = (
+        512,
+        128 if args.submit else 128,
+        4,
+    )
+
     # Configure models
     if args.im_size == 32:
         net_g = Generator32()
@@ -144,29 +154,22 @@ def eval(args):
 
 
 
-    state_dict = torch.load(args.ckpt_path)
-    net_g.load_state_dict(state_dict["net_g"])
-    net_d.load_state_dict(state_dict["net_d"])
+    #state_dict = torch.load(args.ckpt_path)
+    #net_g.load_state_dict(state_dict["net_g"])
+    #net_d.load_state_dict(state_dict["net_d"])
 
     # Configures eval dataloader
-    _, eval_dataloader = util.get_dataloaders(
-        args.data_dir, args.im_size, args.batch_size, eval_size, num_workers
-    )
+    #_, eval_dataloader = util.get_dataloaders(
+    #    args.data_dir, args.im_size, args.batch_size, eval_size, num_workers
+    #)
 
-    if args.submit:
-        # Generate leaderboard submission
-        generate_submission(net_g, eval_dataloader, nz, args.device)
-
-    else:
-        # Evaluate models
-        metrics = evaluate(net_g, net_d, eval_dataloader, nz, args.device)
-        pprint.pprint(metrics)
 
     from config import cfg as opt
 
     opt.merge_from_file(args.config)
     opt.freeze()
-
+    dataset = make_dataset(opt.dataset, conditional=opt.conditional)
+    eval_dataloader = get_data_loader(dataset, eval_size, num_workers)
     print("Creating generator object ...")
     # create the generator object
 
