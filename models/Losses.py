@@ -103,6 +103,7 @@ class StandardGAN(GANLoss):
         self.criterion = BCEWithLogitsLoss()
 
     def dis_loss(self, real_samps, fake_samps, height, alpha):
+        # discriminator loss
         # small assertion:
         assert real_samps.device == fake_samps.device, \
             "Real and Fake samples are not on the same device"

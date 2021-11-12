@@ -9,6 +9,42 @@ from models.GAN import Generator
 from generate_grid import adjust_dynamic_range
 
 
+
+def draw_style_mixing(png, gen, out_depth, n_row=6):
+    # assume mixing of three images
+    with torch.no_grad():
+        latent_size = gen.g_mapping.latent_size
+        z0 = np.random.RandomState(1).randn(n_row, latent_size)
+        z1 = np.random.RandomState(2).randn(n_row, latent_size)
+        z2 = np.random.RandomState(3).randn(n_row, latent_size)
+        zs = [z0, z1, z2]
+        ws = []
+        images = []
+        w = h = 2 ** (out_depth + 2)
+        for z in zs:
+            z = torch.from_numpy(z.astype(np.float32))
+            # w: 1, 10, 512
+            ws.append(gen.g_mapping(z))
+            images.append(gen.g_synthesis(ws[-1], depth=out_depth, alpha=1))
+        # generate mix images
+        w_mix = torch.cat([ws[0][:, :4, :], ws[1][:, 4:8, :], ws[1][:, 8:, :]], axis=1)
+        print(w_mix.shape, ws[-1].shape)
+        # image: n_row, 3, 64, 64
+        images.append(gen.g_synthesis(w_mix, depth=out_depth, alpha=1))
+        print(len(images))
+        canvas = Image.new('RGB', (w * (4 + 1), h * (n_row + 1)), 'white')
+        print(images[-1].shape)
+
+        for row in range(n_row):
+            for col in range(4):
+                img = images[col][row]
+                img = adjust_dynamic_range(img)
+                img = img.mul(255).clamp(0, 255).byte().permute(1, 2, 0).numpy()
+                canvas.paste(Image.fromarray(img, 'RGB'), ((col + 1) * w, (row + 1) * h))
+        print(png)
+        canvas.save(png)
+
+
 def draw_style_mixing_figure(png, gen, out_depth, src_seeds, dst_seeds, style_ranges):
     n_col = len(src_seeds)
     n_row = len(dst_seeds)
@@ -19,6 +55,7 @@ def draw_style_mixing_figure(png, gen, out_depth, src_seeds, dst_seeds, style_ra
         dst_latents_np = np.stack([np.random.RandomState(seed).randn(latent_size, ) for seed in dst_seeds])
         src_latents = torch.from_numpy(src_latents_np.astype(np.float32))
         dst_latents = torch.from_numpy(dst_latents_np.astype(np.float32))
+        print(torch.min(src_latents), torch.max(src_latents))
         src_dlatents = gen.g_mapping(src_latents)  # [seed, layer, component]
         dst_dlatents = gen.g_mapping(dst_latents)  # [seed, layer, component]
         src_images = gen.g_synthesis(src_dlatents, depth=out_depth, alpha=1)
@@ -74,9 +111,13 @@ def main(args):
     # path for saving the files:
     # generate the images:
     # src_seeds = [639, 701, 687, 615, 1999], dst_seeds = [888, 888, 888],
+
+    draw_style_mixing(args.save_path, gen, out_depth=args.depth)
     draw_style_mixing_figure(os.path.join('figure03-style-mixing.png'), gen,
-                             out_depth=6, src_seeds=[639, 1995, 687, 615, 1999], dst_seeds=[888, 888, 888],
+                             out_depth=args.depth, src_seeds=[639, 1995, 687, 615, 1999], dst_seeds=[888, 888, 888],
                              style_ranges=[range(0, 2)] * 1 + [range(2, 8)] * 1 + [range(8, 14)] * 1)
+
+
     print('Done.')
 
 
@@ -91,6 +132,9 @@ def parse_arguments():
     parser.add_argument('--config', default='./configs/sample_race_256.yaml')
     parser.add_argument("--generator_file", action="store", type=str,
                         help="pretrained weights file for generator", required=True)
+    parser.add_argument("--depth", action="store", type=int, default=4,
+                        help="depth for training the network")
+    parser.add_argument('--save_path', default='/content/cs236_gan/style_mix.png')
 
     args = parser.parse_args()
 

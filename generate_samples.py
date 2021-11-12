@@ -29,6 +29,10 @@ def parse_arguments():
     parser.add_argument('--config', default='./configs/sample.yaml')
     parser.add_argument("--generator_file", action="store", type=str,
                         help="pretrained weights file for generator", required=True)
+
+    parser.add_argument("--discriminator_file", action="store", type=str,
+                        help="pretrained weights file for discriminator", required=True)
+
     parser.add_argument("--num_samples", action="store", type=int,
                         default=300, help="number of synchronized grids to be generated")
     parser.add_argument("--output_dir", action="store", type=str,
@@ -85,6 +89,13 @@ def main(args):
                     num_channels=opt.dataset.channels,
                     structure=opt.structure,
                     **opt.model.gen)
+
+    self.dis = Discriminator(num_channels=opt.dataset.channels,
+                             resolution=opt.dataset.resolution,
+                             structure=opt.structure,
+                             conditional=self.conditional,
+                             n_classes=self.n_classes,
+                             **d_args).to(self.device)
 
     print("Loading the generator weights from:", args.generator_file)
     # load the weights into it
