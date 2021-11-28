@@ -2,10 +2,11 @@
 
 output_dir: '/content/cs236_gan/data/out/dog'
 structure: 'linear'
-device_id: ('3')
+device_id: ('1')
+checkpoint_factor: 16
 dataset:
   img_dir: '/content/cs236_gan/data/Images'
   folder: True
   resolution: 64
 sched:
-  epochs: [40,80,80,80,80]
+  epochs: [32,64,64,64,64]
