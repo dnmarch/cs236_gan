@@ -3,7 +3,7 @@
 output_dir: '/content/cs236_gan/data/out/dog'
 structure: 'linear'
 device_id: ('1')
-checkpoint_factor: 32
+checkpoint_factor: 8
 dataset:
   img_dir: '/content/cs236_gan/data/Images'
   folder: True
