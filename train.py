@@ -105,9 +105,10 @@ if __name__ == '__main__':
     # Resume training from checkpoints
     if args.generator_file is not None:
         logger.info("Loading generator from: %s", args.generator_file)
-        # style_gan.gen.load_state_dict(torch.load(args.generator_file))
+        style_gan.gen.load_state_dict(torch.load(args.generator_file))
+        # style_ga.gen.load_state_dict(torch.load(args.generator_file))
         # Load fewer layers of pre-trained models if possible
-        load(style_gan.gen, args.generator_file)
+        # load(style_gan.gen, args.generator_file)
     else:
         logger.info("Training from scratch...")
 
