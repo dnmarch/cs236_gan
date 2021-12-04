@@ -112,7 +112,7 @@ def main(args):
     # generate the images:
     # src_seeds = [639, 701, 687, 615, 1999], dst_seeds = [888, 888, 888],
 
-    draw_style_mixing(args.save_path, gen, out_depth=args.depth)
+    draw_style_mixing(args.save_path, gen, out_depth=args.depth, n_row=args.n_row)
     draw_style_mixing_figure(os.path.join('figure03-style-mixing.png'), gen,
                              out_depth=args.depth, src_seeds=[639, 1995, 687, 615, 1999], dst_seeds=[888, 888, 888],
                              style_ranges=[range(0, 2)] * 1 + [range(2, 8)] * 1 + [range(8, 14)] * 1)
@@ -135,7 +135,7 @@ def parse_arguments():
     parser.add_argument("--depth", action="store", type=int, default=4,
                         help="depth for training the network")
     parser.add_argument('--save_path', default='/content/cs236_gan/style_mix.png')
-
+    parser.add_argument('--n_row', type=int, default=3)
     args = parser.parse_args()
 
     return args
