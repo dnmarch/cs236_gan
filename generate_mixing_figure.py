@@ -32,7 +32,8 @@ def draw_style_mixing(png, gen, out_depth, n_row=6):
         # image: n_row, 3, 64, 64
         images.append(gen.g_synthesis(w_mix, depth=out_depth, alpha=1))
         print(len(images))
-        canvas = Image.new('RGB', (w * (4 + 1), h * (n_row + 1)), 'white')
+        # canvas = Image.new('RGB', (w * (4 + 1), h * (n_row + 1)), 'white')
+        canvas = Image.new('RGB', (w * (4 ), h * (n_row )), 'white')
         print(images[-1].shape)
 
         for row in range(n_row):
@@ -40,7 +41,8 @@ def draw_style_mixing(png, gen, out_depth, n_row=6):
                 img = images[col][row]
                 img = adjust_dynamic_range(img)
                 img = img.mul(255).clamp(0, 255).byte().permute(1, 2, 0).numpy()
-                canvas.paste(Image.fromarray(img, 'RGB'), ((col + 1) * w, (row + 1) * h))
+                # canvas.paste(Image.fromarray(img, 'RGB'), ((col + 1) * w, (row + 1) * h))
+                canvas.paste(Image.fromarray(img, 'RGB'), ((col) * w, (row) * h))
         print(png)
         canvas.save(png)
 
@@ -113,9 +115,9 @@ def main(args):
     # src_seeds = [639, 701, 687, 615, 1999], dst_seeds = [888, 888, 888],
 
     draw_style_mixing(args.save_path, gen, out_depth=args.depth, n_row=args.n_row)
-    draw_style_mixing_figure(os.path.join('figure03-style-mixing.png'), gen,
-                             out_depth=args.depth, src_seeds=[639, 1995, 687, 615, 1999], dst_seeds=[888, 888, 888],
-                             style_ranges=[range(0, 2)] * 1 + [range(2, 8)] * 1 + [range(8, 14)] * 1)
+    #draw_style_mixing_figure(os.path.join('figure03-style-mixing.png'), gen,
+    #                         out_depth=args.depth, src_seeds=[639, 1995, 687, 615, 1999], dst_seeds=[888, 888, 888],
+    #                         style_ranges=[range(0, 2)] * 1 + [range(2, 8)] * 1 + [range(8, 14)] * 1)
 
 
     print('Done.')
