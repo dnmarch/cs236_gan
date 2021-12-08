@@ -1,1 +1,1 @@
-CS 236 GIRAFFE trained on Stanford Dog Dataset
+CS 236 StyleGAN trained on Stanford Dog Dataset
